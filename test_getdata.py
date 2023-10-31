@@ -16,7 +16,7 @@ class TestMongo(unittest.TestCase):
 
         result = get_db_data(datetime.fromisoformat(payload["dt_from"]), datetime.fromisoformat(payload["dt_upto"]),
                              payload["group_type"], self.my_col)
-        self.assertEquals(result, {"dataset": [5906586, 5515874, 5889803, 6092634],
+        self.assertEqual(result, {"dataset": [5906586, 5515874, 5889803, 6092634],
             "labels": ["2022-09-01T00:00:00", "2022-10-01T00:00:00", "2022-11-01T00:00:00", "2022-12-01T00:00:00"]}
         )
 
@@ -31,7 +31,7 @@ class TestMongo(unittest.TestCase):
         result = get_db_data(datetime.fromisoformat(payload["dt_from"]), datetime.fromisoformat(payload["dt_upto"]),
                              payload["group_type"], self.my_col)
         self.maxDiff = None
-        self.assertEquals(result, {"dataset": [0, 0, 0, 195028, 190610, 193448, 203057, 208605, 191361, 186224, 181561, 195264, 213854, 194070,
+        self.assertEqual(result, {"dataset": [0, 0, 0, 195028, 190610, 193448, 203057, 208605, 191361, 186224, 181561, 195264, 213854, 194070,
             208372, 184966, 196745, 185221, 196197, 200647, 196755, 221695, 189114, 204853, 194652, 188096, 215141,
             185000, 206936, 200164, 188238, 195279, 191601, 201722, 207361, 184391, 203336, 205045, 202717, 182251,
             185631, 186703, 193604, 204879, 201341, 202654, 183856, 207001, 204274, 204119, 188486, 191392, 184199,
@@ -68,7 +68,7 @@ class TestMongo(unittest.TestCase):
         result = get_db_data(datetime.fromisoformat(payload["dt_from"]), datetime.fromisoformat(payload["dt_upto"]),
                              payload["group_type"], self.my_col)
         self.maxDiff = None
-        self.assertEquals(result, {"dataset": [8177, 8407, 4868, 7706, 8353, 7143, 6062, 11800, 4077, 8820, 4788, 11045, 13048, 2729, 4038, 9888,
+        self.assertEqual(result, {"dataset": [8177, 8407, 4868, 7706, 8353, 7143, 6062, 11800, 4077, 8820, 4788, 11045, 13048, 2729, 4038, 9888,
             7490, 11644, 11232, 12177, 2741, 5341, 8730, 4718, 0],
 "labels": ["2022-02-01T00:00:00", "2022-02-01T01:00:00", "2022-02-01T02:00:00", "2022-02-01T03:00:00",
            "2022-02-01T04:00:00", "2022-02-01T05:00:00", "2022-02-01T06:00:00", "2022-02-01T07:00:00",

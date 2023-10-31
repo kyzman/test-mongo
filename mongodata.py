@@ -65,31 +65,13 @@ def get_db_data(start, end, interval, collection) -> dict:
         dataset.append(summary)
         pos += 1
 
+    data_range = {"$and": [{"dt": {"$gte": datetime.fromisoformat(labels[-1])}},
+                               {"dt": {"$lte": end}}]}
+    result = collection.find(data_range).sort("dt", 1)
+    summary = 0
+    for value in result:
+        summary += value['value']
+    dataset.append(summary)
 
     return {"dataset": dataset, "labels": labels}
-
-
-if __name__ == "__main__":
-    dt_from = datetime(2022, 2, 1, 0, 0)
-    dt_upto = datetime(2022, 2, 2, 0, 0)
-    group_type = "hour"
-    my_col = get_mongo_mycollection("mongodb://127.0.0.1:27017")
-    print(get_db_data(dt_from, dt_upto, group_type, my_col))
-
-# data_range = {"$and": [{"dt": {"$gt": dt_from}}, {"dt": {"$lt": dt_upto}}]}
-#
-# result = collection.find(data_range).sort("dt", 1)
-
-# summary = 0
-#
-# labels = [dt_from.isoformat()]
-# dataset = []
-
-# for value in result:
-#     if datetime.fromisoformat(labels[-1]).__getattribute__(group_type) == value['dt'].__getattribute__(group_type):
-#         summary += value['value']
-#     else:
-#         labels.append(value['dt'].isoformat())
-#         dataset.append(summary)
-#         summary = value['value']
 
