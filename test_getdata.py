@@ -79,3 +79,12 @@ class TestMongo(unittest.TestCase):
            "2022-02-02T00:00:00"]}
 
         )
+
+    def test_4(self) -> None:
+        """ Проверка теста 4"""
+        payload = {"dt_from": "2022-04-06T00:00:00", "dt_upto": "2022-04-10T00:00:00", "group_type": "day"}
+
+        result = get_db_data(datetime.fromisoformat(payload["dt_from"]), datetime.fromisoformat(payload["dt_upto"]),
+                             payload["group_type"], self.my_col)
+        print(result)
+                            

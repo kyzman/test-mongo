@@ -17,17 +17,21 @@ def get_intervals_day(tstart: datetime, tend: datetime) -> list:
         periods.append(period_start.isoformat())
         period_end = min(period_start + interval, tend)
         period_start = period_end
+    if not tend.day == datetime.fromisoformat(periods[-1]).day:
+        periods.append(tend.isoformat())
     return periods
 
 
 def get_intervals_hour(tstart: datetime, tend: datetime) -> list:
     period_start = tstart
-    periods = [period_start.isoformat()]
+    periods = []
     interval = timedelta(hours=1)
     while period_start < tend:
+        periods.append(period_start.isoformat())
         period_end = min(period_start + interval, tend)
-        periods.append(period_end.isoformat())
         period_start = period_end
+    if not tend.hour == datetime.fromisoformat(periods[-1]).hour:
+        periods.append(tend.isoformat())
     return periods
 
 
