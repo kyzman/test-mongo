@@ -2,7 +2,7 @@ import pymongo
 from datetime import datetime, timedelta
 
 
-def get_intervals_day(tstart: datetime, tend: datetime) -> tuple:
+def get_intervals_day(tstart: datetime, tend: datetime) -> list:
     period_start = tstart
     periods = []
     interval = timedelta(days=1)
@@ -10,10 +10,10 @@ def get_intervals_day(tstart: datetime, tend: datetime) -> tuple:
         periods.append(period_start.isoformat())
         period_end = min(period_start + interval, tend)
         period_start = period_end
-    return tuple(periods)
+    return periods
 
 
-def get_intervals_hour(tstart: datetime, tend: datetime) -> tuple:
+def get_intervals_hour(tstart: datetime, tend: datetime) -> list:
     period_start = tstart
     periods = [period_start.isoformat()]
     interval = timedelta(hours=1)
@@ -21,10 +21,10 @@ def get_intervals_hour(tstart: datetime, tend: datetime) -> tuple:
         period_end = min(period_start + interval, tend)
         periods.append(period_end.isoformat())
         period_start = period_end
-    return tuple(periods)
+    return periods
 
 
-def get_interval_months(start: datetime, end: datetime) -> tuple:
+def get_intervals_month(start: datetime, end: datetime) -> list:
     cursor = start
     months = [cursor.isoformat()]
     while cursor <= end:
@@ -33,18 +33,40 @@ def get_interval_months(start: datetime, end: datetime) -> tuple:
         else:
             months.append(datetime(cursor.year, cursor.month, 1, 0, 0).isoformat())
 
-    return tuple(months)
+    return months
+
+def get_db_data(start, end, interval) -> dict:
+    ...
+
 
 
 client = pymongo.MongoClient("mongodb://127.0.0.1:27017")
 db = client.sampleDB
 collection = db.sample_collection
 
-dt_from = datetime(2022, 9, 1, 0, 0)
-dt_upto = datetime(2022, 12, 31, 23, 59)
+dt_from = datetime(2022, 2, 1, 0, 0)
+dt_upto = datetime(2022, 2, 2, 0, 0)
 group_type = "hour"
 
-print(get_interval_months(dt_from, dt_upto))
+labels = "Некорректный диапазон!"
+
+if group_type == 'day':
+    labels = get_intervals_day(dt_from, dt_upto)
+elif group_type == 'hour':
+    labels = get_intervals_hour(dt_from, dt_upto)
+elif group_type == 'month':
+    labels = get_intervals_month(dt_from, dt_upto)
+
+dataset = []
+pos = 0
+while pos < len(labels)-1:
+    data_range = {"$and": [{"dt": {"$gte": datetime.fromisoformat(labels[pos])}}, {"dt": {"$lt": datetime.fromisoformat(labels[pos+1])}}]}
+    result = collection.find(data_range).sort("dt", 1)
+    summary = 0
+    for value in result:
+        summary += value['value']
+    dataset.append(summary)
+    pos += 1
 
 
 
@@ -65,5 +87,6 @@ print(get_interval_months(dt_from, dt_upto))
 #         dataset.append(summary)
 #         summary = value['value']
 
-# print(dataset)
-# print(labels)
+print(dataset)
+print(len(labels))
+print(labels)
