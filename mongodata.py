@@ -2,6 +2,13 @@ import pymongo
 from datetime import datetime, timedelta
 
 
+def get_mongo_mycollection(url):
+    client = pymongo.MongoClient(url)
+    db = client.sampleDB
+    collection = db.sample_collection
+    return collection
+
+
 def get_intervals_day(tstart: datetime, tend: datetime) -> list:
     period_start = tstart
     periods = []
@@ -35,40 +42,39 @@ def get_intervals_month(start: datetime, end: datetime) -> list:
 
     return months
 
-def get_db_data(start, end, interval) -> dict:
-    ...
+
+def get_db_data(start, end, interval, collection) -> dict:
+    labels = ["Некорректный диапазон!"]
+
+    if interval == 'day':
+        labels = get_intervals_day(start, end)
+    elif interval == 'hour':
+        labels = get_intervals_hour(start, end)
+    elif interval == 'month':
+        labels = get_intervals_month(start, end)
+
+    dataset = []
+    pos = 0
+    while pos < len(labels) - 1:
+        data_range = {"$and": [{"dt": {"$gte": datetime.fromisoformat(labels[pos])}},
+                               {"dt": {"$lt": datetime.fromisoformat(labels[pos + 1])}}]}
+        result = collection.find(data_range).sort("dt", 1)
+        summary = 0
+        for value in result:
+            summary += value['value']
+        dataset.append(summary)
+        pos += 1
 
 
-
-client = pymongo.MongoClient("mongodb://127.0.0.1:27017")
-db = client.sampleDB
-collection = db.sample_collection
-
-dt_from = datetime(2022, 2, 1, 0, 0)
-dt_upto = datetime(2022, 2, 2, 0, 0)
-group_type = "hour"
-
-labels = "Некорректный диапазон!"
-
-if group_type == 'day':
-    labels = get_intervals_day(dt_from, dt_upto)
-elif group_type == 'hour':
-    labels = get_intervals_hour(dt_from, dt_upto)
-elif group_type == 'month':
-    labels = get_intervals_month(dt_from, dt_upto)
-
-dataset = []
-pos = 0
-while pos < len(labels)-1:
-    data_range = {"$and": [{"dt": {"$gte": datetime.fromisoformat(labels[pos])}}, {"dt": {"$lt": datetime.fromisoformat(labels[pos+1])}}]}
-    result = collection.find(data_range).sort("dt", 1)
-    summary = 0
-    for value in result:
-        summary += value['value']
-    dataset.append(summary)
-    pos += 1
+    return {"dataset": dataset, "labels": labels}
 
 
+if __name__ == "__main__":
+    dt_from = datetime(2022, 2, 1, 0, 0)
+    dt_upto = datetime(2022, 2, 2, 0, 0)
+    group_type = "hour"
+    my_col = get_mongo_mycollection("mongodb://127.0.0.1:27017")
+    print(get_db_data(dt_from, dt_upto, group_type, my_col))
 
 # data_range = {"$and": [{"dt": {"$gt": dt_from}}, {"dt": {"$lt": dt_upto}}]}
 #
@@ -87,6 +93,3 @@ while pos < len(labels)-1:
 #         dataset.append(summary)
 #         summary = value['value']
 
-print(dataset)
-print(len(labels))
-print(labels)
